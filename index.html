@@ -618,7 +618,7 @@
     let editingPlaceId = null;
     let editingTagsBackup = []; 
     
-    // 💡 [새 상태 추가] 강제로 펼쳐서 보여줄 게시물 ID 목록을 기억하는 배열
+    // 💡 강제로 펼쳐서 보여줄 게시물 ID 목록을 기억하는 배열
     let expandedCommentPlaceIds = [];
 
     window.addNewTag = addNewTag;
@@ -708,6 +708,9 @@
         input.value = '';
         renderFormTags();
         renderFilterButtons();
+        if (editingPlaceId) {
+            toggleEditingTag(newTagName);
+        }
     }
 
     function deleteTagFromPool(tag) {
@@ -715,8 +718,13 @@
             availableTags = availableTags.filter(t => t !== tag);
             selectedTagsForNewPlace = selectedTagsForNewPlace.filter(t => t !== tag);
             activeFilters = activeFilters.filter(t => t !== tag);
+            editingTagsBackup = editingTagsBackup.filter(t => t !== tag);
             renderFormTags();
             renderFilterButtons();
+            if (editingPlaceId) {
+                const editTagZone = document.getElementById(`edit-tag-zone-${editingPlaceId}`);
+                if (editTagZone) toggleEditingTag(''); 
+            }
         }
     }
 
@@ -794,11 +802,16 @@
     }
 
     function toggleEditingTag(tag) {
-        if (editingTagsBackup.includes(tag)) {
-            editingTagsBackup = editingTagsBackup.filter(t => t !== tag);
-        } else {
-            editingTagsBackup.push(tag);
+        if (!editingPlaceId) return;
+
+        if (tag && tag !== '') {
+            if (editingTagsBackup.includes(tag)) {
+                editingTagsBackup = editingTagsBackup.filter(t => t !== tag);
+            } else {
+                editingTagsBackup.push(tag);
+            }
         }
+        
         const editTagZone = document.getElementById(`edit-tag-zone-${editingPlaceId}`);
         if(editTagZone) {
             editTagZone.innerHTML = availableTags.map(t => {
@@ -806,7 +819,7 @@
                 const color = getTagColor(t);
                 return `
                     <span class="badge" 
-                          style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px;" 
+                          style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px; cursor:pointer;" 
                           onclick="toggleEditingTag('${t}')">
                         ${t}
                     </span>
@@ -860,7 +873,6 @@
         await updateDoc(doc(db, "japan_trip_db", id), { likes, likedBy });
     }
 
-    // 💬 댓글 작성
     async function addComment(id) {
         const commenter = document.getElementById(`cmt-user-${id}`).value;
         const text = document.getElementById(`cmt-text-${id}`).value.trim();
@@ -868,7 +880,6 @@
         if (!commenter) { alert("댓글 다는 사람을 먼저 골라주세요!"); return; }
         if (!text) return;
 
-        // 💡 내가 새 댓글을 달면 확인하기 편하도록 해당 카드는 강제 펼침 리스트에 추가
         if (!expandedCommentPlaceIds.includes(id)) {
             expandedCommentPlaceIds.push(id);
         }
@@ -878,7 +889,6 @@
         });
     }
 
-    // 💡 더보기 / 접기 버튼 토글 함수
     function toggleCommentsExpand(id) {
         if (expandedCommentPlaceIds.includes(id)) {
             expandedCommentPlaceIds = expandedCommentPlaceIds.filter(pid => pid !== id);
@@ -894,14 +904,12 @@
         }
     }
 
-    // 🎨 UI 렌더링 엔진
     function renderPlaces() {
         const placesList = document.getElementById('places-list');
         const countSpan = document.getElementById('count');
         const myFingerprint = localStorage.getItem('user_fingerprint') || '';
         if (!placesList) return;
 
-        // [댓글 타이핑 보존 백업]
         const savedDrafts = {};
         places.forEach(place => {
             const userEl = document.getElementById(`cmt-user-${place.id}`);
@@ -953,7 +961,7 @@
                             ${availableTags.map(t => {
                                 const isSelected = editingTagsBackup.includes(t);
                                 const color = getTagColor(t);
-                                return `<span class="badge" style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px;" onclick="toggleEditingTag('${t}')">${t}</span>`;
+                                return `<span class="badge" style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px; cursor:pointer;" onclick="toggleEditingTag('${t}')">${t}</span>`;
                             }).join('')}
                         </div>
 
@@ -972,14 +980,12 @@
                 const isLiked = place.likedBy && place.likedBy.includes(myFingerprint);
                 const comments = place.comments || [];
                 
-                // 💡 [댓글 축소/더보기 핵심 로직]
                 const isExpanded = expandedCommentPlaceIds.includes(place.id);
                 let renderedComments = [...comments];
                 let showMoreBtnHtml = '';
 
-                // 댓글이 3개보다 많고, '더보기'를 누르지 않은 상태라면 축소 시전
                 if (comments.length > 3 && !isExpanded) {
-                    renderedComments = comments.slice(0, 3); // 앞에서부터 3개만 자르기
+                    renderedComments = comments.slice(0, 3); 
                     showMoreBtnHtml = `<button class="comment-more-btn" onclick="toggleCommentsExpand('${place.id}')">💬 댓글 ${comments.length - 3}개 더보기 ▽</button>`;
                 } else if (comments.length > 3 && isExpanded) {
                     showMoreBtnHtml = `<button class="comment-more-btn" onclick="toggleCommentsExpand('${place.id}')">▲ 댓글 접기</button>`;
@@ -1031,7 +1037,6 @@
 
             placesList.appendChild(li);
 
-            // [댓글 인풋 복원 로직]
             const userEl = document.getElementById(`cmt-user-${place.id}`);
             const textEl = document.getElementById(`cmt-text-${place.id}`);
             if (savedDrafts[place.id] && userEl && textEl) {
