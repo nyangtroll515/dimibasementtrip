@@ -531,8 +531,8 @@
     <form id="travel-form">
         <div class="input-group">
             <label>👤 누구의 추천 장소인가요?</label>
-            <select id="uploader" required>
-                <option value="" disabled selected>이름을 선택해 주세요 ▽</option>
+            <select id="uploader">
+                <option value="" selected>이름을 선택해 주세요 ▽</option>
                 <option value="김지오">😺 김지오</option>
                 <option value="오건우">🍈 오건우</option>
                 <option value="유연호">🤖 유연호</option>
@@ -618,7 +618,6 @@
     let editingPlaceId = null;
     let editingTagsBackup = []; 
     
-    // 💡 강제로 펼쳐서 보여줄 게시물 ID 목록을 기억하는 배열
     let expandedCommentPlaceIds = [];
 
     window.addNewTag = addNewTag;
@@ -632,8 +631,6 @@
     window.toggleEditingTag = toggleEditingTag;
     window.saveEditResult = saveEditResult;
     window.cancelEditMode = cancelEditMode;
-    
-    // 댓글 더보기 관련 전역 매핑
     window.toggleCommentsExpand = toggleCommentsExpand;
 
     onSnapshot(collection(db, "japan_trip_db"), (snapshot) => {
@@ -722,8 +719,7 @@
             renderFormTags();
             renderFilterButtons();
             if (editingPlaceId) {
-                const editTagZone = document.getElementById(`edit-tag-zone-${editingPlaceId}`);
-                if (editTagZone) toggleEditingTag(''); 
+                toggleEditingTag(''); 
             }
         }
     }
@@ -777,6 +773,13 @@
         const title = document.getElementById('title').value.trim();
         let url = document.getElementById('url').value.trim();
         const memo = document.getElementById('memo').value.trim();
+
+        // 🚨 작성자를 고르지 않고 기본값 상태일 때 경고창 띄우기
+        if (!uploader || uploader === "") {
+            alert("👤 추천 장소의 작성자를 선택해 주세요!");
+            document.getElementById('uploader').focus();
+            return;
+        }
 
         if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
 
@@ -837,13 +840,20 @@
         if(!title || !url) { alert("제목과 주소는 비워둘 수 없습니다!"); return; }
         if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
 
-        await updateDoc(doc(db, "japan_trip_db", id), {
-            title, url, memo, uploader,
-            tags: [...editingTagsBackup]
-        });
+        try {
+            await updateDoc(doc(db, "japan_trip_db", id), {
+                title, url, memo, uploader,
+                tags: [...editingTagsBackup]
+            });
 
-        editingPlaceId = null;
-        editingTagsBackup = [];
+            alert("✨ 성공적으로 수정되었습니다!");
+            editingPlaceId = null;
+            editingTagsBackup = [];
+            renderPlaces();
+        } catch (error) {
+            console.error("수정 오류 발생:", error);
+            alert("❌ 수정 중 오류가 발생했습니다.");
+        }
     }
 
     function cancelEditMode() {
