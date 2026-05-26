@@ -206,12 +206,19 @@
             padding: 14px;
             border-radius: 16px;
             border: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .filter-block {
+            display: flex;
+            flex-direction: column;
         }
         .filter-title {
             font-size: 13px;
             font-weight: bold;
             color: #57606f;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .filter-container {
             display: flex;
@@ -244,6 +251,12 @@
             background: #1e272e;
             border-color: #1e272e;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .filter-btn.user-active {
+            background: #0072ff;
+            color: #fff;
+            border-color: #0072ff;
+            box-shadow: 0 4px 8px rgba(0, 114, 255, 0.2);
         }
 
         /* 리스트 목록 및 카드 */
@@ -333,12 +346,14 @@
             border-radius: 20px;
             font-weight: bold;
             color: white;
+            cursor: pointer;
         }
 
-        /* 액션 버튼 그룹 (좋아요, 삭제) */
+        /* 액션 버튼 그룹 */
         .card-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            align-items: center;
         }
 
         .like-btn {
@@ -361,6 +376,27 @@
             border-color: #ff3838;
         }
 
+        .edit-btn {
+            background-color: #747d8c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .save-btn {
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         .delete-btn {
             background-color: #ff4757;
             color: white;
@@ -370,6 +406,29 @@
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
+        }
+
+        /* 실시간 카드 내부 수정 폼 스타일 */
+        .edit-mode-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f1f2f6;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+        }
+        .edit-mode-box input, .edit-mode-box textarea, .edit-mode-box select {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+        }
+        .edit-tag-select-zone {
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #747d8c;
         }
 
         /* 댓글 컴포넌트 영역 스타일 */
@@ -388,7 +447,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .comment-item {
             background: #f8f9fa;
@@ -405,6 +464,23 @@
         .comment-text {
             color: #57606f;
         }
+        
+        /* 💬 댓글 더보기 / 접기 토글 버튼 */
+        .comment-more-btn {
+            background: none;
+            border: none;
+            color: #0072ff;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 0 8px 4px;
+            display: block;
+            text-align: left;
+        }
+        .comment-more-btn:hover {
+            text-decoration: underline;
+        }
+
         /* 댓글 작성 미니 폼 */
         .comment-form {
             display: flex;
@@ -496,8 +572,14 @@
     </form>
 
     <div class="filter-wrapper">
-        <div class="filter-title">⚡ 카테고리별 골라보기 (여러 개 터치해서 중복 필터 가능!)</div>
-        <div class="filter-container" id="filter-container"></div>
+        <div class="filter-block">
+            <div class="filter-title">🏷️ 카테고리별 골라보기 (여러 개 터치해서 중복 필터 가능!)</div>
+            <div class="filter-container" id="filter-container"></div>
+        </div>
+        <div class="filter-block" style="border-top: 1px dashed #ced4da; padding-top: 10px;">
+            <div class="filter-title">👤 추천인별 골라보기 (멤버 선택 가능)</div>
+            <div class="filter-container" id="user-filter-container"></div>
+        </div>
     </div>
 
     <div class="list-title">
@@ -511,7 +593,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 🔑 지오님의 고유 파이어베이스 식별 주소 정상 연동 완료!
+    // 🔑 지오님의 고유 파이어베이스 식별 주소 연동
     const firebaseConfig = {
         apiKey: "AIzaSyAMGc4Czztbu-GQlIyq8EfYPaiXzpjikxQ",
         authDomain: "dimibasementtrip-283d1.firebaseapp.com",
@@ -522,35 +604,44 @@
         measurementId: "G-TSFVQG8NXQ"
     };
 
-    // 파이어베이스 및 데이터베이스(Firestore) 초기 실행
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 고정 멤버 리스트 정의
     const members = ["김지오", "오건우", "유연호", "이지호", "이지훈", "한희진"];
 
-    // 데이터 상태 관리
     let availableTags = ['장소', '위치', '밥', '액티비티'];
     let selectedTagsForNewPlace = [];
     let activeFilters = []; 
+    let activeUserFilter = ""; 
     let places = [];
+    
+    let editingPlaceId = null;
+    let editingTagsBackup = []; 
+    
+    // 💡 [새 상태 추가] 강제로 펼쳐서 보여줄 게시물 ID 목록을 기억하는 배열
+    let expandedCommentPlaceIds = [];
 
-    // 전역 함수 연동 (HTML 태그에서 클릭 이벤트를 감지할 수 있도록 window 객체에 선언)
     window.addNewTag = addNewTag;
     window.deleteTagFromPool = deleteTagFromPool;
     window.toggleFilter = toggleFilter;
+    window.toggleUserFilter = toggleUserFilter;
     window.toggleLike = toggleLike;
     window.addComment = addComment;
     window.deletePlace = deletePlace;
+    window.turnOnEditMode = turnOnEditMode;
+    window.toggleEditingTag = toggleEditingTag;
+    window.saveEditResult = saveEditResult;
+    window.cancelEditMode = cancelEditMode;
+    
+    // 댓글 더보기 관련 전역 매핑
+    window.toggleCommentsExpand = toggleCommentsExpand;
 
-    // 📡 구글 서버(Firestore) 실시간 데이터 감시 및 연동 시작
     onSnapshot(collection(db, "japan_trip_db"), (snapshot) => {
         places = [];
         snapshot.forEach((doc) => {
             places.push({ id: doc.id, ...doc.data() });
         });
         
-        // 서버에 누적된 새로운 커스텀 태그가 있다면 내 선택 풀에도 자동 연동
         places.forEach(p => {
             if(p.tags) {
                 p.tags.forEach(t => { if(!availableTags.includes(t)) availableTags.push(t); });
@@ -559,6 +650,7 @@
         
         renderFormTags();
         renderFilterButtons();
+        renderUserFilterButtons();
         renderPlaces();
     });
 
@@ -570,6 +662,7 @@
 
     function renderFormTags() {
         const tagPool = document.getElementById('tag-pool');
+        if (!tagPool) return;
         tagPool.innerHTML = '';
 
         availableTags.forEach(tag => {
@@ -629,6 +722,7 @@
 
     function renderFilterButtons() {
         const filterContainer = document.getElementById('filter-container');
+        if (!filterContainer) return;
         const isAllActive = activeFilters.length === 0 ? 'active' : '';
         let html = `<button type="button" class="filter-btn all-btn ${isAllActive}" onclick="toggleFilter('전체')">🌈 전체보기</button>`;
 
@@ -648,7 +742,26 @@
         renderPlaces();
     }
 
-    // 📥 폼 전송 시 구글 서버(Firestore)로 실시간 전송
+    function renderUserFilterButtons() {
+        const userFilterContainer = document.getElementById('user-filter-container');
+        if (!userFilterContainer) return;
+        const isAllActive = activeUserFilter === "" ? "active" : "";
+        let html = `<button type="button" class="filter-btn all-btn ${isAllActive}" onclick="toggleUserFilter('')">🌈 전체보기</button>`;
+        
+        members.forEach(m => {
+            const isActive = activeUserFilter === m ? "user-active" : "";
+            html += `<button type="button" class="filter-btn ${isActive}" onclick="toggleUserFilter('${m}')">${m}</button>`;
+        });
+        userFilterContainer.innerHTML = html;
+    }
+
+    function toggleUserFilter(name) {
+        if (activeUserFilter === name) activeUserFilter = ""; 
+        else activeUserFilter = name;
+        renderUserFilterButtons();
+        renderPlaces();
+    }
+
     document.getElementById('travel-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -672,7 +785,60 @@
         document.getElementById('travel-form').reset();
     });
 
-    // ❤️ 좋아요 토글 (Firestore 실시간 반영 및 기기별 차단)
+    function turnOnEditMode(id) {
+        const place = places.find(p => p.id === id);
+        if(!place) return;
+        editingPlaceId = id;
+        editingTagsBackup = place.tags ? [...place.tags] : [];
+        renderPlaces();
+    }
+
+    function toggleEditingTag(tag) {
+        if (editingTagsBackup.includes(tag)) {
+            editingTagsBackup = editingTagsBackup.filter(t => t !== tag);
+        } else {
+            editingTagsBackup.push(tag);
+        }
+        const editTagZone = document.getElementById(`edit-tag-zone-${editingPlaceId}`);
+        if(editTagZone) {
+            editTagZone.innerHTML = availableTags.map(t => {
+                const isSelected = editingTagsBackup.includes(t);
+                const color = getTagColor(t);
+                return `
+                    <span class="badge" 
+                          style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px;" 
+                          onclick="toggleEditingTag('${t}')">
+                        ${t}
+                    </span>
+                `;
+            }).join('');
+        }
+    }
+
+    async function saveEditResult(id) {
+        const title = document.getElementById(`edit-title-${id}`).value.trim();
+        let url = document.getElementById(`edit-url-${id}`).value.trim();
+        const memo = document.getElementById(`edit-memo-${id}`).value.trim();
+        const uploader = document.getElementById(`edit-uploader-${id}`).value;
+
+        if(!title || !url) { alert("제목과 주소는 비워둘 수 없습니다!"); return; }
+        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+        await updateDoc(doc(db, "japan_trip_db", id), {
+            title, url, memo, uploader,
+            tags: [...editingTagsBackup]
+        });
+
+        editingPlaceId = null;
+        editingTagsBackup = [];
+    }
+
+    function cancelEditMode() {
+        editingPlaceId = null;
+        editingTagsBackup = [];
+        renderPlaces();
+    }
+
     async function toggleLike(id) {
         const myFingerprint = localStorage.getItem('user_fingerprint') || Math.random().toString(36).substring(2, 9);
         localStorage.setItem('user_fingerprint', myFingerprint);
@@ -694,7 +860,7 @@
         await updateDoc(doc(db, "japan_trip_db", id), { likes, likedBy });
     }
 
-    // 💬 댓글 작성 서버 다이렉트 전송
+    // 💬 댓글 작성
     async function addComment(id) {
         const commenter = document.getElementById(`cmt-user-${id}`).value;
         const text = document.getElementById(`cmt-text-${id}`).value.trim();
@@ -702,12 +868,26 @@
         if (!commenter) { alert("댓글 다는 사람을 먼저 골라주세요!"); return; }
         if (!text) return;
 
+        // 💡 내가 새 댓글을 달면 확인하기 편하도록 해당 카드는 강제 펼침 리스트에 추가
+        if (!expandedCommentPlaceIds.includes(id)) {
+            expandedCommentPlaceIds.push(id);
+        }
+
         await updateDoc(doc(db, "japan_trip_db", id), {
             comments: arrayUnion({ id: Date.now(), user: commenter, text: text })
         });
     }
 
-    // ❌ 서버에서 완전 삭제
+    // 💡 더보기 / 접기 버튼 토글 함수
+    function toggleCommentsExpand(id) {
+        if (expandedCommentPlaceIds.includes(id)) {
+            expandedCommentPlaceIds = expandedCommentPlaceIds.filter(pid => pid !== id);
+        } else {
+            expandedCommentPlaceIds.push(id);
+        }
+        renderPlaces();
+    }
+
     async function deletePlace(id) {
         if(confirm("이 장소를 목록에서 지울까요? 친구들 화면에서도 즉시 사라집니다.")) {
             await deleteDoc(doc(db, "japan_trip_db", id));
@@ -719,6 +899,18 @@
         const placesList = document.getElementById('places-list');
         const countSpan = document.getElementById('count');
         const myFingerprint = localStorage.getItem('user_fingerprint') || '';
+        if (!placesList) return;
+
+        // [댓글 타이핑 보존 백업]
+        const savedDrafts = {};
+        places.forEach(place => {
+            const userEl = document.getElementById(`cmt-user-${place.id}`);
+            const textEl = document.getElementById(`cmt-text-${place.id}`);
+            if (userEl && textEl) {
+                savedDrafts[place.id] = { user: userEl.value, text: textEl.value };
+            }
+        });
+
         placesList.innerHTML = '';
 
         let filteredPlaces = places;
@@ -728,7 +920,10 @@
             );
         }
 
-        // 최신 글이 항상 맨 위로 오도록 정렬
+        if (activeUserFilter !== "") {
+            filteredPlaces = filteredPlaces.filter(place => place.uploader === activeUserFilter);
+        }
+
         filteredPlaces.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
         countSpan.textContent = filteredPlaces.length;
 
@@ -741,53 +936,118 @@
             const li = document.createElement('li');
             li.style.borderLeftColor = place.tags && place.tags.length > 0 ? getTagColor(place.tags[0]) : '#ff4e50';
 
-            const tagsHtml = place.tags && place.tags.length > 0 
-                ? `<div class="card-tags">${place.tags.map(t => `<span class="badge" style="background-color:${getTagColor(t)}">${t}</span>`).join('')}</div>`
-                : '';
+            if (editingPlaceId === place.id) {
+                const uploaderOptions = members.map(m => 
+                    `<option value="${m}" ${place.uploader === m ? 'selected' : ''}>${m}</option>`
+                ).join('');
 
-            const isLiked = place.likedBy && place.likedBy.includes(myFingerprint);
-            const comments = place.comments || [];
-            let commentsListHtml = comments.map(c => `
-                <div class="comment-item">
-                    <span class="comment-user">👤 ${c.user}</span>
-                    <span class="comment-text">${c.text}</span>
-                </div>
-            `).join('');
+                li.innerHTML = `
+                    <div class="edit-mode-box">
+                        <div style="font-size:12px; font-weight:bold; color:#ff4e50;">⚙️ 게시물 정보 수정 중...</div>
+                        <select id="edit-uploader-${place.id}">${uploaderOptions}</select>
+                        <input type="text" id="edit-title-${place.id}" value="${place.title}" placeholder="제목 입력">
+                        <input type="text" id="edit-url-${place.id}" value="${place.url}" placeholder="웹사이트 링크">
+                        
+                        <div style="font-size:11px; font-weight:bold; color:#57606f; margin-top:4px;">🏷️ 태그 수정 (터치하여 켜고 끄기)</div>
+                        <div class="edit-tag-select-zone" id="edit-tag-zone-${place.id}">
+                            ${availableTags.map(t => {
+                                const isSelected = editingTagsBackup.includes(t);
+                                const color = getTagColor(t);
+                                return `<span class="badge" style="background-color: ${isSelected ? color : '#dcdde1'}; color: ${isSelected ? 'white' : '#747d8c'}; margin-right:6px; display:inline-block; margin-bottom:4px;" onclick="toggleEditingTag('${t}')">${t}</span>`;
+                            }).join('')}
+                        </div>
 
-            const memberOptions = members.map(m => `<option value="${m}">${m}</option>`).join('');
+                        <textarea id="edit-memo-${place.id}" rows="2" placeholder="메모 수정">${place.memo || ''}</textarea>
+                        <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:4px;">
+                            <button class="save-btn" onclick="saveEditResult('${place.id}')">💾 저장</button>
+                            <button class="edit-btn" onclick="cancelEditMode()">취소</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const tagsHtml = place.tags && place.tags.length > 0 
+                    ? `<div class="card-tags">${place.tags.map(t => `<span class="badge" style="background-color:${getTagColor(t)}">${t}</span>`).join('')}</div>`
+                    : '';
 
-            li.innerHTML = `
-                <div class="card-top">
-                    <div class="link-info">
-                        <div><span class="uploader-tag">👤 추천: ${place.uploader || '미지정'}</span></div>
-                        <a href="${place.url}" target="_blank" class="link-anchor">${place.title} 🔗</a>
-                        ${tagsHtml}
-                        ${place.memo ? `<div class="link-memo">${place.memo}</div>` : ''}
-                    </div>
-                    <div class="card-actions">
-                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${place.id}')">
-                            ${isLiked ? '❤️' : '🤍'} <span>${place.likes || 0}</span>
-                        </button>
-                        <button class="delete-btn" onclick="deletePlace('${place.id}')">삭제</button>
-                    </div>
-                </div>
+                const isLiked = place.likedBy && place.likedBy.includes(myFingerprint);
+                const comments = place.comments || [];
+                
+                // 💡 [댓글 축소/더보기 핵심 로직]
+                const isExpanded = expandedCommentPlaceIds.includes(place.id);
+                let renderedComments = [...comments];
+                let showMoreBtnHtml = '';
 
-                <div class="comment-zone">
-                    <div class="comment-count-title">댓글 (${comments.length})</div>
-                    <div class="comment-list">
-                        ${comments.length === 0 ? '<div style="font-size:12px; color:#b2bec3; padding-left:4px;">첫 댓글을 남겨보세요!</div>' : commentsListHtml}
+                // 댓글이 3개보다 많고, '더보기'를 누르지 않은 상태라면 축소 시전
+                if (comments.length > 3 && !isExpanded) {
+                    renderedComments = comments.slice(0, 3); // 앞에서부터 3개만 자르기
+                    showMoreBtnHtml = `<button class="comment-more-btn" onclick="toggleCommentsExpand('${place.id}')">💬 댓글 ${comments.length - 3}개 더보기 ▽</button>`;
+                } else if (comments.length > 3 && isExpanded) {
+                    showMoreBtnHtml = `<button class="comment-more-btn" onclick="toggleCommentsExpand('${place.id}')">▲ 댓글 접기</button>`;
+                }
+
+                let commentsListHtml = renderedComments.map(c => `
+                    <div class="comment-item">
+                        <span class="comment-user">👤 ${c.user}</span>
+                        <span class="comment-text">${c.text}</span>
                     </div>
-                    <div class="comment-form">
-                        <select id="cmt-user-${place.id}">
-                            <option value="" disabled selected>작성자</option>
-                            ${memberOptions}
-                        </select>
-                        <input type="text" id="cmt-text-${place.id}" placeholder="여기에 한마디 적기...">
-                        <button type="button" onclick="addComment('${place.id}')">등록</button>
+                `).join('');
+
+                const memberOptions = members.map(m => `<option value="${m}">${m}</option>`).join('');
+
+                li.innerHTML = `
+                    <div class="card-top">
+                        <div class="link-info">
+                            <div><span class="uploader-tag">👤 추천: ${place.uploader || '미지정'}</span></div>
+                            <a href="${place.url}" target="_blank" class="link-anchor">${place.title} 🔗</a>
+                            ${tagsHtml}
+                            ${place.memo ? `<div class="link-memo">${place.memo}</div>` : ''}
+                        </div>
+                        <div class="card-actions">
+                            <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${place.id}')">
+                                ${isLiked ? '❤️' : '🤍'} <span>${place.likes || 0}</span>
+                            </button>
+                            <button class="edit-btn" onclick="turnOnEditMode('${place.id}')">수정</button>
+                            <button class="delete-btn" onclick="deletePlace('${place.id}')">삭제</button>
+                        </div>
                     </div>
-                </div>
-            `;
+
+                    <div class="comment-zone">
+                        <div class="comment-count-title">댓글 (${comments.length})</div>
+                        <div class="comment-list">
+                            ${comments.length === 0 ? '<div style="font-size:12px; color:#b2bec3; padding-left:4px;">첫 댓글을 남겨보세요!</div>' : commentsListHtml}
+                        </div>
+                        ${showMoreBtnHtml}
+                        <div class="comment-form">
+                            <select id="cmt-user-${place.id}">
+                                <option value="" disabled selected>작성자</option>
+                                ${memberOptions}
+                            </select>
+                            <input type="text" id="cmt-text-${place.id}" placeholder="여기에 한마디 적기...">
+                            <button type="button" onclick="addComment('${place.id}')">등록</button>
+                        </div>
+                    </div>
+                `;
+            }
+
             placesList.appendChild(li);
+
+            // [댓글 인풋 복원 로직]
+            const userEl = document.getElementById(`cmt-user-${place.id}`);
+            const textEl = document.getElementById(`cmt-text-${place.id}`);
+            if (savedDrafts[place.id] && userEl && textEl) {
+                if (savedDrafts[place.id].user) userEl.value = savedDrafts[place.id].user;
+                if (savedDrafts[place.id].text) textEl.value = savedDrafts[place.id].text;
+            }
+            if (userEl && textEl) {
+                userEl.addEventListener('input', () => {
+                    if(!savedDrafts[place.id]) savedDrafts[place.id] = {};
+                    savedDrafts[place.id].user = userEl.value;
+                });
+                textEl.addEventListener('input', () => {
+                    if(!savedDrafts[place.id]) savedDrafts[place.id] = {};
+                    savedDrafts[place.id].text = textEl.value;
+                });
+            }
         });
     }
 </script>
