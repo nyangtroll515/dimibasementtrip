@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💩 디미고 지하실 일본 여행 프로젝트</title>
+    <style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+            --gradient-btn: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-dark: #1e272e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Apple SD Gothic Neo", "Malgun Gothic";
+            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 헤더 디자인 */
+        .header-zone {
+            text-align: center;
+            padding: 20px 10px;
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(255, 78, 80, 0.3);
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        /* 입력 폼 */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #485460;
+            padding-left: 4px;
+        }
+
+        input, textarea, select {
+            padding: 14px;
+            border: 2px solid #dcdde1;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #ff4e50;
+            box-shadow: 0 0 8px rgba(255, 78, 80, 0.2);
+        }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M0 3l5 5 5-5z' fill='%23485460'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 40px;
+        }
+
+        /* 태그 관리 영역 */
+        .tag-manager-box {
+            background: #fff;
+            border: 2px dashed #ff793f;
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .add-tag-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .add-tag-form input {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+        .add-tag-form button {
+            background: #34ace0;
+            color: white;
+            border: none;
+            padding: 0 14px;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .selectable-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #f1f2f6;
+            border: 2px solid #dcdde1;
+            color: #747d8c;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        
+        .selectable-tag.active {
+            border-color: #1e272e;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+        }
+
+        .tag-del-x {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.1);
+            color: inherit;
+            border-radius: 50%;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .tag-del-x:hover {
+            background: #ff4757;
+            color: white;
+        }
+
+        .submit-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 78, 80, 0.2);
+        }
+
+        /* 다중 필터 바 */
+        .filter-wrapper {
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid #dee2e6;
+        }
+        .filter-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #57606f;
+            margin-bottom: 10px;
+        }
+        .filter-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-container::-webkit-scrollbar { display: none; }
+        
+        .filter-btn {
+            background-color: #fff;
+            color: #485460;
+            border: 2px solid #dcdde1;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 30px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: #ff4e50;
+            color: #fff;
+            border-color: #ff4e50;
+            box-shadow: 0 4px 8px rgba(255, 78, 80, 0.2);
+        }
+        .filter-btn.all-btn.active {
+            background: #1e272e;
+            border-color: #1e272e;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 리스트 목록 및 카드 */
+        .list-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1e272e;
+            border-bottom: 3px solid #ff4e50;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        li {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            padding: 18px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border-left: 6px solid #ff4e50;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .link-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .link-anchor {
+            text-decoration: none;
+            color: #0072ff;
+            font-weight: 700;
+            font-size: 17px;
+            word-break: break-all;
+        }
+        .link-anchor:hover { text-decoration: underline; }
+
+        .uploader-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #eccc68;
+            color: #2f3542;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .link-memo {
+            font-size: 13px;
+            color: #57606f;
+            background: #f1f2f6;
+            padding: 10px 12px;
+            border-radius: 8px;
+            white-space: pre-line;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* 액션 버튼 그룹 (좋아요, 삭제) */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .like-btn {
+            background: #fff0f6;
+            color: #ff3838;
+            border: 1px solid #ffb3b3;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .like-btn.liked {
+            background: #ff3838;
+            color: #fff;
+            border-color: #ff3838;
+        }
+
+        .delete-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* 댓글 컴포넌트 영역 스타일 */
+        .comment-zone {
+            margin-top: 14px;
+            border-top: 1px dashed #dee2e6;
+            padding-top: 12px;
+        }
+        .comment-count-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #747d8c;
+            margin-bottom: 6px;
+        }
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .comment-item {
+            background: #f8f9fa;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .comment-user {
+            font-weight: 800;
+            color: #333;
+            margin-right: 6px;
+        }
+        .comment-text {
+            color: #57606f;
+        }
+        /* 댓글 작성 미니 폼 */
+        .comment-form {
+            display: flex;
+            gap: 6px;
+        }
+        .comment-form select {
+            padding: 6px;
+            font-size: 12px;
+            border-radius: 8px;
+            width: 90px;
+            border: 1px solid #ced4da;
+        }
+        .comment-form input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+        }
+        .comment-form button {
+            background: #2f3542;
+            color: white;
+            border: none;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #a4b0be;
+            padding: 40px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-zone">
+        <h1>✈️ 디미고 지하실 일본 여행 프로젝트</h1>
+        <div class="subtitle">가고 싶은 곳 적어라 💩</div>
+    </div>
+
+    <form id="travel-form">
+        <div class="input-group">
+            <label>👤 누구의 추천 장소인가요?</label>
+            <select id="uploader" required>
+                <option value="" disabled selected>이름을 선택해 주세요 ▽</option>
+                <option value="김지오">😺 김지오</option>
+                <option value="오건우">🍈 오건우</option>
+                <option value="유연호">🤖 유연호</option>
+                <option value="이지호">🦍 이지호</option>
+                <option value="이지훈">🦴 이지훈</option>
+                <option value="한희진">🐻 한희진</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>📍 제목</label>
+            <input type="text" id="title" placeholder="예: 도쿄 해리포터 스튜디오, 오사카 타코야끼" required>
+        </div>
+
+        <div class="input-group">
+            <label>🔗 블로그 / 웹사이트 주소</label>
+            <input type="text" id="url" placeholder="링크 주소(URL)를 붙여넣으세요" required>
+        </div>
+        
+        <div class="input-group">
+            <label>🏷️ 태그 고르기 (터치해서 선택 / X 눌러 삭제)</label>
+            <div class="tag-manager-box">
+                <div class="add-tag-form">
+                    <input type="text" id="new-tag-input" placeholder="새 태그 입력 (예: 쇼핑, 도쿄)">
+                    <button type="button" onclick="addNewTag()">+ 추가</button>
+                </div>
+                <div class="tag-pool" id="tag-pool"></div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>📝 간단한 메모</label>
+            <textarea id="memo" placeholder="예: 인당 2천엔, 일본 가서 이거 안먹으면 안감 ㅅㄱ" rows="2"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">🔥 가고 싶은 장소 등록하기!</button>
+    </form>
+
+    <div class="filter-wrapper">
+        <div class="filter-title">⚡ 카테고리별 골라보기 (여러 개 터치해서 중복 필터 가능!)</div>
+        <div class="filter-container" id="filter-container"></div>
+    </div>
+
+    <div class="list-title">
+        <span>🗺️ 위시리스트 목록</span>
+        <span style="color: #ff4e50;" id="count">0</span>
+    </div>
+    <ul id="places-list"></ul>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 🔑 지오님의 고유 파이어베이스 식별 주소 정상 연동 완료!
+    const firebaseConfig = {
+        apiKey: "AIzaSyAMGc4Czztbu-GQlIyq8EfYPaiXzpjikxQ",
+        authDomain: "dimibasementtrip-283d1.firebaseapp.com",
+        projectId: "dimibasementtrip-283d1",
+        storageBucket: "dimibasementtrip-283d1.firebasestorage.app",
+        messagingSenderId: "230763075110",
+        appId: "1:230763075110:web:80fd0238afa82b0e1f78e7",
+        measurementId: "G-TSFVQG8NXQ"
+    };
+
+    // 파이어베이스 및 데이터베이스(Firestore) 초기 실행
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 고정 멤버 리스트 정의
+    const members = ["김지오", "오건우", "유연호", "이지호", "이지훈", "한희진"];
+
+    // 데이터 상태 관리
+    let availableTags = ['장소', '위치', '밥', '액티비티'];
+    let selectedTagsForNewPlace = [];
+    let activeFilters = []; 
+    let places = [];
+
+    // 전역 함수 연동 (HTML 태그에서 클릭 이벤트를 감지할 수 있도록 window 객체에 선언)
+    window.addNewTag = addNewTag;
+    window.deleteTagFromPool = deleteTagFromPool;
+    window.toggleFilter = toggleFilter;
+    window.toggleLike = toggleLike;
+    window.addComment = addComment;
+    window.deletePlace = deletePlace;
+
+    // 📡 구글 서버(Firestore) 실시간 데이터 감시 및 연동 시작
+    onSnapshot(collection(db, "japan_trip_db"), (snapshot) => {
+        places = [];
+        snapshot.forEach((doc) => {
+            places.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // 서버에 누적된 새로운 커스텀 태그가 있다면 내 선택 풀에도 자동 연동
+        places.forEach(p => {
+            if(p.tags) {
+                p.tags.forEach(t => { if(!availableTags.includes(t)) availableTags.push(t); });
+            }
+        });
+        
+        renderFormTags();
+        renderFilterButtons();
+        renderPlaces();
+    });
+
+    function getTagColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+        return `hsl(${Math.abs(hash % 360)}, 80%, 42%)`;
+    }
+
+    function renderFormTags() {
+        const tagPool = document.getElementById('tag-pool');
+        tagPool.innerHTML = '';
+
+        availableTags.forEach(tag => {
+            const isSelected = selectedTagsForNewPlace.includes(tag);
+            const tagColor = getTagColor(tag);
+
+            const tagEl = document.createElement('div');
+            tagEl.className = `selectable-tag ${isSelected ? 'active' : ''}`;
+            
+            if (isSelected) {
+                tagEl.style.backgroundColor = tagColor;
+                tagEl.style.borderColor = tagColor;
+            } else {
+                tagEl.style.backgroundColor = '';
+                tagEl.style.borderColor = '';
+                tagEl.style.color = '#485460';
+            }
+
+            tagEl.innerHTML = `
+                <span class="tag-txt">${tag}</span>
+                <span class="tag-del-x" title="선택지에서 제거">&times;</span>
+            `;
+
+            tagEl.querySelector('.tag-txt').addEventListener('click', () => {
+                if (selectedTagsForNewPlace.includes(tag)) selectedTagsForNewPlace = selectedTagsForNewPlace.filter(t => t !== tag);
+                else selectedTagsForNewPlace.push(tag);
+                renderFormTags();
+            });
+            tagEl.querySelector('.tag-del-x').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTagFromPool(tag);
+            });
+
+            tagPool.appendChild(tagEl);
+        });
+    }
+
+    function addNewTag() {
+        const input = document.getElementById('new-tag-input');
+        const newTagName = input.value.trim();
+        if (!newTagName) return;
+        if (!availableTags.includes(newTagName)) availableTags.push(newTagName);
+        input.value = '';
+        renderFormTags();
+        renderFilterButtons();
+    }
+
+    function deleteTagFromPool(tag) {
+        if (confirm(`'${tag}' 태그를 고르기 창에서 제외할까요?`)) {
+            availableTags = availableTags.filter(t => t !== tag);
+            selectedTagsForNewPlace = selectedTagsForNewPlace.filter(t => t !== tag);
+            activeFilters = activeFilters.filter(t => t !== tag);
+            renderFormTags();
+            renderFilterButtons();
+        }
+    }
+
+    function renderFilterButtons() {
+        const filterContainer = document.getElementById('filter-container');
+        const isAllActive = activeFilters.length === 0 ? 'active' : '';
+        let html = `<button type="button" class="filter-btn all-btn ${isAllActive}" onclick="toggleFilter('전체')">🌈 전체보기</button>`;
+
+        availableTags.forEach(tag => {
+            html += `<button type="button" class="filter-btn ${activeFilters.includes(tag) ? 'active' : ''}" onclick="toggleFilter('${tag}')">${tag}</button>`;
+        });
+        filterContainer.innerHTML = html;
+    }
+
+    function toggleFilter(tag) {
+        if (tag === '전체') activeFilters = [];
+        else {
+            if (activeFilters.includes(tag)) activeFilters = activeFilters.filter(t => t !== tag);
+            else activeFilters.push(tag);
+        }
+        renderFilterButtons();
+        renderPlaces();
+    }
+
+    // 📥 폼 전송 시 구글 서버(Firestore)로 실시간 전송
+    document.getElementById('travel-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const uploader = document.getElementById('uploader').value;
+        const title = document.getElementById('title').value.trim();
+        let url = document.getElementById('url').value.trim();
+        const memo = document.getElementById('memo').value.trim();
+
+        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+        await addDoc(collection(db, "japan_trip_db"), {
+            uploader, title, url, memo,
+            tags: [...selectedTagsForNewPlace],
+            likes: 0,
+            likedBy: [],
+            comments: [],
+            createdAt: Date.now()
+        });
+
+        selectedTagsForNewPlace = [];
+        document.getElementById('travel-form').reset();
+    });
+
+    // ❤️ 좋아요 토글 (Firestore 실시간 반영 및 기기별 차단)
+    async function toggleLike(id) {
+        const myFingerprint = localStorage.getItem('user_fingerprint') || Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('user_fingerprint', myFingerprint);
+
+        const place = places.find(p => p.id === id);
+        if (!place) return;
+
+        let likedBy = place.likedBy || [];
+        let likes = place.likes || 0;
+
+        if (likedBy.includes(myFingerprint)) {
+            likedBy = likedBy.filter(uid => uid !== myFingerprint);
+            likes = Math.max(0, likes - 1);
+        } else {
+            likedBy.push(myFingerprint);
+            likes++;
+        }
+
+        await updateDoc(doc(db, "japan_trip_db", id), { likes, likedBy });
+    }
+
+    // 💬 댓글 작성 서버 다이렉트 전송
+    async function addComment(id) {
+        const commenter = document.getElementById(`cmt-user-${id}`).value;
+        const text = document.getElementById(`cmt-text-${id}`).value.trim();
+
+        if (!commenter) { alert("댓글 다는 사람을 먼저 골라주세요!"); return; }
+        if (!text) return;
+
+        await updateDoc(doc(db, "japan_trip_db", id), {
+            comments: arrayUnion({ id: Date.now(), user: commenter, text: text })
+        });
+    }
+
+    // ❌ 서버에서 완전 삭제
+    async function deletePlace(id) {
+        if(confirm("이 장소를 목록에서 지울까요? 친구들 화면에서도 즉시 사라집니다.")) {
+            await deleteDoc(doc(db, "japan_trip_db", id));
+        }
+    }
+
+    // 🎨 UI 렌더링 엔진
+    function renderPlaces() {
+        const placesList = document.getElementById('places-list');
+        const countSpan = document.getElementById('count');
+        const myFingerprint = localStorage.getItem('user_fingerprint') || '';
+        placesList.innerHTML = '';
+
+        let filteredPlaces = places;
+        if (activeFilters.length > 0) {
+            filteredPlaces = places.filter(place => 
+                activeFilters.every(fTag => place.tags && place.tags.includes(fTag))
+            );
+        }
+
+        // 최신 글이 항상 맨 위로 오도록 정렬
+        filteredPlaces.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+        countSpan.textContent = filteredPlaces.length;
+
+        if (filteredPlaces.length === 0) {
+            placesList.innerHTML = `<div class="empty-msg">조건에 맞는 저장 장소가 아직 없어요!</div>`;
+            return;
+        }
+
+        filteredPlaces.forEach(place => {
+            const li = document.createElement('li');
+            li.style.borderLeftColor = place.tags && place.tags.length > 0 ? getTagColor(place.tags[0]) : '#ff4e50';
+
+            const tagsHtml = place.tags && place.tags.length > 0 
+                ? `<div class="card-tags">${place.tags.map(t => `<span class="badge" style="background-color:${getTagColor(t)}">${t}</span>`).join('')}</div>`
+                : '';
+
+            const isLiked = place.likedBy && place.likedBy.includes(myFingerprint);
+            const comments = place.comments || [];
+            let commentsListHtml = comments.map(c => `
+                <div class="comment-item">
+                    <span class="comment-user">👤 ${c.user}</span>
+                    <span class="comment-text">${c.text}</span>
+                </div>
+            `).join('');
+
+            const memberOptions = members.map(m => `<option value="${m}">${m}</option>`).join('');
+
+            li.innerHTML = `
+                <div class="card-top">
+                    <div class="link-info">
+                        <div><span class="uploader-tag">👤 추천: ${place.uploader || '미지정'}</span></div>
+                        <a href="${place.url}" target="_blank" class="link-anchor">${place.title} 🔗</a>
+                        ${tagsHtml}
+                        ${place.memo ? `<div class="link-memo">${place.memo}</div>` : ''}
+                    </div>
+                    <div class="card-actions">
+                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${place.id}')">
+                            ${isLiked ? '❤️' : '🤍'} <span>${place.likes || 0}</span>
+                        </button>
+                        <button class="delete-btn" onclick="deletePlace('${place.id}')">삭제</button>
+                    </div>
+                </div>
+
+                <div class="comment-zone">
+                    <div class="comment-count-title">댓글 (${comments.length})</div>
+                    <div class="comment-list">
+                        ${comments.length === 0 ? '<div style="font-size:12px; color:#b2bec3; padding-left:4px;">첫 댓글을 남겨보세요!</div>' : commentsListHtml}
+                    </div>
+                    <div class="comment-form">
+                        <select id="cmt-user-${place.id}">
+                            <option value="" disabled selected>작성자</option>
+                            ${memberOptions}
+                        </select>
+                        <input type="text" id="cmt-text-${place.id}" placeholder="여기에 한마디 적기...">
+                        <button type="button" onclick="addComment('${place.id}')">등록</button>
+                    </div>
+                </div>
+            `;
+            placesList.appendChild(li);
+        });
+    }
+</script>
+
+</body>
+</html>
